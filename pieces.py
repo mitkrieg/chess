@@ -53,11 +53,17 @@ class Piece:
         if self.movement(target):
             square = self.check_block(target,board)
             if square:
-                print('returned check block')
+                print('a returned square')
                 # print('square')
-                board[target[0]][target[1]] = board[self.location[0]][self.location[1]]
-                board[self.location[0]][self.location[1]] = None
+                board.grid[target[0]][target[1]] = board.grid[self.location[0]][self.location[1]]
+                board.grid[self.location[0]][self.location[1]] = None
                 self.manual_mover(target[0], target[1])
+
+                if self.name == 'King':
+                    if self.player == 'white':
+                        board.white_king = self
+                    else:
+                        board.black_king = self
                 
                 return square
         else:
@@ -77,8 +83,11 @@ class Pawn(Piece):
         self.promoted = False
         super().__init__('Pawn', player, location)
 
-    def move(self, target, board, capture=0,promotion=None):
+    def move(self, target, board, capture=0,test=None,promotion=None):
+        
         assert capture in [0, -1, 1], 'Capture must be int: 1 (right) or -1 (left) or 0 (No Capture)'
+
+        grid = board.grid
 
         if capture != 0:
             
@@ -90,16 +99,16 @@ class Pawn(Piece):
 
             assert target == (row,col), 'Not Valid Move!'
 
-            if board[row][col] is not None:
-                captured_piece = board[row][col].capture() 
+            if grid[row][col] is not None:
+                captured_piece = grid[row][col].capture() 
                 if (row == 0 and self.player == 'white') or (row == 7 and self.player == 'black'):
                     assert promotion is not None, 'Must pass promotion class'
-                    board[row][col] == self.promote(promotion)
-                    print(board[row][col])
-                    board[self.location[0]][self.location[1]] = None
+                    grid[row][col] == self.promote(promotion)
+                    print(grid[row][col])
+                    grid[self.location[0]][self.location[1]] = None
                 else:
-                    board[row][col] = board[self.location[0]][self.location[1]]
-                    board[self.location[0]][self.location[1]] = None
+                    grid[row][col] = grid[self.location[0]][self.location[1]]
+                    grid[self.location[0]][self.location[1]] = None
                     self.manual_mover(row, col)               
                 
                 return captured_piece
@@ -115,27 +124,30 @@ class Pawn(Piece):
 
             assert target == (row,col) or (self.ever_moved == False and target == (row2,col)), 'Not Valid Move!'
 
-            if board[row][col] is not None:
-                raise ValueError('Piece is blocking the way')
+            if grid[row][col] is not None:
+                raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
 
             if (row == 0 and self.player == 'white') or (row == 7 and self.player == 'black'):
                 assert promotion is not None, 'Must pass promotion class'
                 print(promotion(self.player,(row,col)))
-                board[row][col] = self.promote(promotion,(row,col))
-                print(board[row][col])
-                board[self.location[0]][self.location[1]] = None
+                grid[row][col] = self.promote(promotion,(row,col))
+                # print(grid[row][col])
+                grid[self.location[0]][self.location[1]] = None
             else:
-                board[target[0]][target[1]] = board[self.location[0]][self.location[1]]
-                board[self.location[0]][self.location[1]] = None
-                self.manual_mover(row, col)
+                grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
+                grid[self.location[0]][self.location[1]] = None
+                self.manual_mover(target[0], target[1])
 
 
         return True
 
 
     def promote(self,piece,target):
+        p = piece(self.player,target)
         self.promoted = True
-        return piece(self.player,target)
+        print(f'Pawn promoted to {p}')
+        
+        return p
 
 class Queen(Piece):
 
@@ -148,17 +160,18 @@ class Queen(Piece):
         super().__init__('Queen',player,location)
 
     def movement(self, target):
-        print('check for valid movemnet')
+        print('test for valid movemnet')
         return (
             target[0] == self.location[0] or 
             target[1] == self.location[1] or
             abs(target[0] - self.location[0]) == abs(target[1] - self.location[1])
         )
 
-    def check_block(self, target, board):
-        print('checked for pieces')
+    def check_block(self, target, board, test=False):
+        print('test for pieces in the way or captured')
         dist_x =  target[0] - self.location[0]
         dist_y =  target[1] - self.location[1]
+        grid = board.grid
 
         if dist_y == 0:
             if dist_x > 0:
@@ -171,11 +184,14 @@ class Queen(Piece):
             for i in range(direction,dist_x+direction,direction):
                 row = self.location[0]+i
                 col = target[1]
-                print(f'checking: ({row},{col})')
-                if board[row][col] is not None:
-                    if (row, col) == target and board[row][col].player != self.player:
-                        return board[row][col].capture()
-                    raise ValueError('Piece is Blocking the Way')
+                print(f'testing: ({row},{col})')
+                if grid[row][col] is not None:
+                    if (row, col) == target and grid[row][col].player != self.player:
+                        if not test:
+                            return grid[row][col].capture()
+                        else:
+                            return True
+                    raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         elif dist_x == 0:
             if dist_y > 0:
                 direction = 1
@@ -187,11 +203,14 @@ class Queen(Piece):
             for i in range(direction,dist_y+direction,direction):
                 row = target[0]
                 col = self.location[1]+i
-                print(f'checking: ({row},{col})')
-                if board[row][col] is not None:
-                    if (row, col) == target and board[row][col].player != self.player:
-                        return board[row][col].capture()
-                    raise ValueError('Piece is Blocking the Way')
+                print(f'testing: ({row},{col})')
+                if grid[row][col] is not None:
+                    if (row, col) == target and grid[row][col].player != self.player:
+                        if not test:
+                            return grid[row][col].capture()
+                        else:
+                            return True
+                    raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         
         elif abs(dist_x) == abs(dist_y):
             for i in range(1,abs(dist_x)+1):
@@ -199,36 +218,48 @@ class Queen(Piece):
                     if dist_y > 0:
                         row = self.location[0]+i
                         col = self.location[1]+i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                     else:
                         row = self.location[0]+i
                         col = self.location[1]-i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                 else:
                     if dist_y > 0:
                         row = self.location[0]-i
                         col = self.location[1]+i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                     else:
                         row = self.location[0]-i
                         col = self.location[1]-i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         else:
             return ValueError('Coordinates Off')
         
@@ -254,11 +285,15 @@ class King(Piece):
             (abs(target[0] - self.location[0]) == 1 and abs(target[1] - self.location[1]) == 1)
         )
 
-    def check_block(self, target, board):
-        if board[target[0]][target[1]] is not None:
-            if board[target[0]][target[1]].player != self.player:
-                return board[target[0]][target[1]].capture()
-            raise ValueError('Piece is Blocking the Way')
+    def check_block(self, target, board, test=False):
+        grid = board.grid
+        if grid[target[0]][target[1]] is not None:
+            if grid[target[0]][target[1]].player != self.player:
+                if not test:
+                    return grid[target[0]][target[1]].capture()
+                else:
+                    return True
+            raise ValueError(f'Piece {grid[target[0]][target[1]]} is Blocking the Way')
         
         return True
 
@@ -276,10 +311,11 @@ class Rook(Piece):
             target[1] == self.location[1] 
         )
 
-    def check_block(self, target, board):
+    def check_block(self, target, board, test=False):
         print('checked for pieces')
         dist_x =  target[0] - self.location[0]
         dist_y =  target[1] - self.location[1]
+        grid = board.grid
 
         if dist_y == 0:
             if dist_x > 0:
@@ -292,11 +328,14 @@ class Rook(Piece):
             for i in range(direction,dist_x+direction,direction):
                 row = self.location[0]+i
                 col = target[1]
-                print(f'checking: ({row},{col})')
-                if board[row][col] is not None:
-                    if (row, col) == target and board[row][col].player != self.player:
-                        return board[row][col].capture()
-                    raise ValueError('Piece is Blocking the Way')
+                print(f'testing: ({row},{col})')
+                if grid[row][col] is not None:
+                    if (row, col) == target and grid[row][col].player != self.player:
+                        if not test:
+                            return grid[row][col].capture()
+                        else:
+                            return True
+                    raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         elif dist_x == 0:
             if dist_y > 0:
                 direction = 1
@@ -308,11 +347,14 @@ class Rook(Piece):
             for i in range(direction,dist_y+direction,direction):
                 row = target[0]
                 col = self.location[1]+i
-                print(f'checking: ({row},{col})')
-                if board[row][col] is not None:
-                    if (row, col) == target and board[row][col].player != self.player:
-                        return board[row][col].capture()
-                    raise ValueError('Piece is Blocking the Way')
+                print(f'testing: ({row},{col})')
+                if grid[row][col] is not None:
+                    if (row, col) == target and grid[row][col].player != self.player:
+                        if not test:
+                            return grid[row][col].capture()
+                        else:
+                            return True
+                    raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         else:
             return ValueError('Coordinates Off')
 
@@ -329,9 +371,10 @@ class Bishop(Piece):
             abs(target[0] - self.location[0]) == abs(target[1] - self.location[1])
         )
 
-    def check_block(self, target, board):
+    def check_block(self, target, board, test=False):
         dist_x =  target[0] - self.location[0]
         dist_y =  target[1] - self.location[1]
+        grid = board.grid
         
         if abs(dist_x) == abs(dist_y):
             for i in range(1,abs(dist_x)+1):
@@ -339,36 +382,48 @@ class Bishop(Piece):
                     if dist_y > 0:
                         row = self.location[0]+i
                         col = self.location[1]+i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                     else:
                         row = self.location[0]+i
                         col = self.location[1]-i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                 else:
                     if dist_y > 0:
                         row = self.location[0]-i
                         col = self.location[1]+i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
                     else:
                         row = self.location[0]-i
                         col = self.location[1]-i
-                        print(f'checking: ({row},{col})')
-                        if board[row][col] is not None:
-                            if (row, col) == target and board[row][col].player != self.player:
-                                return board[row][col].capture()
-                            raise ValueError('Piece is Blocking the Way')
+                        print(f'testing: ({row},{col})')
+                        if grid[row][col] is not None:
+                            if (row, col) == target and grid[row][col].player != self.player:
+                                if not test:
+                                    return grid[row][col].capture()
+                                else:
+                                    return True
+                            raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
         else:
             return ValueError('Coordinates Off')
 
@@ -380,17 +435,24 @@ class Knight(Piece):
     def __init__(self,player,location):
         super().__init__('Knight',player,location)
 
+    def symbol(self):
+        return 'N' + self.player[0]
+
     def movement(self,target):
         return (
             (abs(target[0] - self.location[0]) == 1 and abs(target[1] - self.location[1]) == 2) or
             (abs(target[0] - self.location[0]) == 2 and abs(target[1] - self.location[1]) == 1)
         )
 
-    def check_block(self, target, board):
-        if board[target[0]][target[1]] is not None:
-            if board[target[0]][target[1]].player != self.player:
-                return board[target[0]][target[1]].capture()
-            raise ValueError('Piece is Blocking the Way')
+    def check_block(self, target, board, test = False):
+        grid = board.grid
+        if grid[target[0]][target[1]] is not None:
+            if grid[target[0]][target[1]].player != self.player:
+                if not test:
+                    return grid[target[0]][target[1]].capture()
+                else:
+                    return True
+            raise ValueError(f'Piece {grid[target[0]][target[1]]} is Blocking the Way')
         
         return True
         
