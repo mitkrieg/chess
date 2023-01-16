@@ -59,14 +59,7 @@ body {
 
 .space > .piece {
     font-size: 5rem;
-    /* text-align: center;
-    vertical-align: center; */
-    /* display: inline-block; */
-    /* position: absolute; */
-    /* height: 50%; */
-    /* display: block; */
-    /* height: 100%;
-    margin: 0 auto; */
+    cursor: pointer;
 }
 
 h1 {
