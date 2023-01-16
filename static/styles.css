@@ -23,6 +23,10 @@ body {
     border: 1px solid ;
     outline: none;
     background-color: tan;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .chessboard > .space:nth-child(16n+2) {
@@ -52,6 +56,18 @@ body {
 /* .chessboard > .space:nth-child(16n+2) {
     background-color: brown;
 } */
+
+.space > .piece {
+    font-size: 5rem;
+    /* text-align: center;
+    vertical-align: center; */
+    /* display: inline-block; */
+    /* position: absolute; */
+    /* height: 50%; */
+    /* display: block; */
+    /* height: 100%;
+    margin: 0 auto; */
+}
 
 h1 {
     justify-content: center;
