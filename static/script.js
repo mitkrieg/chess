@@ -9,7 +9,7 @@ const draggable = new d.Droppable(document.querySelectorAll('.space'), {
     dropzone: '.space'
 });
 
-// draggable.on('droppable:dropped', () => console.log('droppable:dropped'))
+draggable.on('droppable:dropped', () => console.log('droppable:dropped'))
 // draggable.on('droppable:stop', () => console.log('droppable:returned'))
 // draggable.on('droppable:start', () => console.log('droppable:start'))
 
@@ -35,12 +35,21 @@ draggable.on('drag:stop', (evt) => {
         }
     ).then(
         body => {
-            console.log(body.capture)
-            if (body.capture == true) {
-                console.log(body.slug)
-                document.getElementById(body.slug).remove()
+            console.log(body)
+            if (body.success == true) {
+                console.log(body.piece + ' moved from '+ body.movement.origin + ' to ' + body.movement.destination)
+                if (body.capture == true) {
+                    document.getElementById(body.captured_slug).remove();
+                    console.log(body.captured_slug + ' was captured')
+                }
+            } else {
+                console.log(body.error);
+                console.log(document.getElementById(body.movement.origin))
+                console.log(document.getElementById(body.piece))
+                document.getElementById(body.movement.origin).appendChild(
+                    document.getElementById(body.piece)
+                )
             }
-
         }
     )
 });

@@ -18,20 +18,43 @@ def make_move():
     # print('It worked!')
     body = request.get_json()
     
-    piece = body.get('piece')
-    origin = [int(x) for x in body.get('origin').split('-')]
-    dest = [int(x) for x in body.get('destination').split('-')]
-    print('Piece: ',piece)
-    print('Origin: ',origin)
-    print('Requested Destination: ',dest)
-    capture = game.grid[origin[0]][origin[1]].move((dest[0],dest[1]),game)
-    print('Captured: ', capture)
-    if issubclass(type(capture),Piece):
+    try:
+        piece = body.get('piece')
+        origin = body.get('origin')
+        origin_list = [int(x) for x in origin.split('-')]
+        dest = body.get('destination')
+        dest_list = [int(x) for x in dest.split('-')]
+        print('Piece: ',piece)
+        print('Origin: ',origin)
+        print('Requested Destination: ',dest)
+        capture = game.grid[origin_list[0]][origin_list[1]].move((dest_list[0],dest_list[1]),game)
+        print('Captured: ', capture)
+        if issubclass(type(capture),Piece):
+            return jsonify({
+                "success":True, 
+                'capture':True,
+                'piece':piece,
+                'captured_slug':capture.slug,
+                'movement':{
+                    'origin':origin,
+                    'destination':dest
+                }
+            })
+        else:
+            return jsonify({
+                "success":True, 
+                'capture':False,
+                'piece':piece,
+                'movement':{
+                    'origin':origin,
+                    'destination':dest
+                }
+            })
+    except Exception as e:
+        print(e)
         return jsonify({
-            "success":True, 
-            'capture':True,
-            'piece':capture.name,
-            'slug':capture.slug
+            "success":False,
+            "error":str(e),
+            'piece':piece,
+            'movement':{'origin':origin}
         })
-    else:
-        return jsonify({"success":'true','capture':'false'})
