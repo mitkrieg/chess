@@ -2,10 +2,12 @@ class Piece:
 
     LOCATION_MAPPER = {i:letter for i,letter in enumerate('ABCDEFGH') }
 
-    def __init__(self, name, player, location):
+    def __init__(self, name, player, location,nickname=''):
         self.name = name
         assert player in ('white','black'), 'Player must be "white" or "black"'
         self.player = player
+        self.nickname = str(nickname)
+        self.slug = '-'.join([player, name, self.nickname])
         assert (location[0], location[1]) <= (7,7) and (location[0], location[1]) >= (0,0), 'Out of Bounds'
         self.location = location
         self.captured = False 
@@ -79,9 +81,9 @@ class Piece:
 
 class Pawn(Piece):
 
-    def __init__(self, player, location):
+    def __init__(self, player, location, nickname=''):
         self.promoted = False
-        super().__init__('Pawn', player, location)
+        super().__init__('pawn', player, location,nickname)
 
     def move(self, target, board, capture=0,test=None,promotion=None):
         
@@ -151,13 +153,13 @@ class Pawn(Piece):
 
 class Queen(Piece):
 
-    def __init__(self,player,location=None):
+    def __init__(self,player,location=None,nickname=''):
         if location is None:
             if player == 'white':
                 location = (7,3)
             else:
                 location = (0,3)
-        super().__init__('Queen',player,location)
+        super().__init__('queen',player,location,nickname)
 
     def movement(self, target):
         print('test for valid movemnet')
@@ -269,13 +271,13 @@ class Queen(Piece):
 
 class King(Piece):
 
-    def __init__(self,player,location=None):
+    def __init__(self,player,location=None,nickname=''):
         if location is None:
             if player == 'white':
                 location = (7,4)
             else:
                 location = (0,4)
-        super().__init__('King',player,location)
+        super().__init__('king',player,location, nickname)
 
 
     def movement(self, target):
@@ -301,8 +303,8 @@ class King(Piece):
 
 class Rook(Piece):
 
-    def __init__(self,player,location):
-        super().__init__('Rook',player,location)
+    def __init__(self, player, location, nickname=''):
+        super().__init__('rook', player, location, nickname)
 
 
     def movement(self,target):
@@ -362,8 +364,8 @@ class Rook(Piece):
 
 class Bishop(Piece):
 
-    def __init__(self,player,location):
-        super().__init__('Bishop',player,location)
+    def __init__(self,player,location,nickname=''):
+        super().__init__('bishop',player,location,nickname)
 
 
     def movement(self, target):
@@ -432,11 +434,11 @@ class Bishop(Piece):
 
 class Knight(Piece):
 
-    def __init__(self,player,location):
-        super().__init__('Knight',player,location)
+    def __init__(self,player,location,nickname=''):
+        super().__init__('knight',player,location,nickname)
 
     def symbol(self):
-        return 'N' + self.player[0]
+        return 'n' + self.player[0]
 
     def movement(self,target):
         return (

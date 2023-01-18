@@ -20,6 +20,7 @@ draggable.on('drag:stop', (evt) => {
     console.log('Piece: ',evt.data.source.id);
     console.log('Origin: ', evt.data.sourceContainer.id);
     console.log('Distination: ', evt.data.source.parentNode.id);
+    document.getElementById(evt.data.source.parentNode.id).classList.remove('draggable-dropzone--occupied')
     fetch(url, {
         "method":'POST',
         "headers": {"Content-Type": "application/json"},
@@ -28,7 +29,20 @@ draggable.on('drag:stop', (evt) => {
             "destination":evt.data.source.parentNode.id,
             "piece":evt.data.source.id
         })
-    })
+    }).then(
+        response => {
+            return response.json();
+        }
+    ).then(
+        body => {
+            console.log(body.capture)
+            if (body.capture == true) {
+                console.log(body.slug)
+                document.getElementById(body.slug).remove()
+            }
+
+        }
+    )
 });
 // draggable.on('droppable:dropped', (evt) => console.log(evt))
 
