@@ -85,61 +85,63 @@ class Pawn(Piece):
         self.promoted = False
         super().__init__('pawn', player, location,nickname)
 
-    def move(self, target, board, capture=0,test=None,promotion=None):
-        
-        assert capture in [0, -1, 1], 'Capture must be int: 1 (right) or -1 (left) or 0 (No Capture)'
+    def move(self, target, board, test=None,promotion=None):
+        print(board)
 
         grid = board.grid
-
-        if capture != 0:
             
-            col = self.location[1] + capture
-            if self.player == 'white':
-                row = self.location[0] - 1
-            else:
-                row = self.location[0] + 1
-
-            assert target == (row,col), 'Not Valid Move!'
-
-            if grid[row][col] is not None:
-                captured_piece = grid[row][col].capture() 
-                if (row == 0 and self.player == 'white') or (row == 7 and self.player == 'black'):
-                    assert promotion is not None, 'Must pass promotion class'
-                    grid[row][col] == self.promote(promotion)
-                    print(grid[row][col])
-                    grid[self.location[0]][self.location[1]] = None
-                else:
-                    grid[row][col] = grid[self.location[0]][self.location[1]]
-                    grid[self.location[0]][self.location[1]] = None
-                    self.manual_mover(row, col)               
-                
-                return captured_piece
-
+        col = self.location[1]
+        if self.player == 'white':
+            row = self.location[0] - 1
+            row2 = self.location[0] - 2
         else:
-            col = self.location[1]
-            if self.player == 'white':
-                row = self.location[0] - 1
-                row2 = self.location[0] - 2
+            row = self.location[0] + 1
+            row2 = self.location[0] + 2
+
+        # if ((row == 0 and self.player == 'white') or (row == 7 and self.player == 'black')) and target == (row,col):
+        #     assert promotion is not None, 'Must pass promotion class'
+        #     print(promotion(self.player,(row,col)))
+        #     grid[row][col] = self.promote(promotion,(row,col))
+        #     # print(grid[row][col])
+        #     grid[self.location[0]][self.location[1]] = None
+        if target == (row,col+1) or target == (row,col -1):
+            if grid[target[0]][target[1]] is not None and grid[target[0]][target[1]].player != self.player:
+                if self.ever_moved == False:
+                    self.ever_moved = True
+                captured_piece = grid[target[0]][target[1]]
+                grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
+                grid[self.location[0]][self.location[1]] = None 
+                self.manual_mover(target[0],target[1])
+                return captured_piece.capture()
             else:
-                row = self.location[0] + 1
-                row2 = self.location[0] + 2
-
-            assert target == (row,col) or (self.ever_moved == False and target == (row2,col)), 'Not Valid Move!'
-
+                print('huh')
+                raise ValueError('Not Valid Move!')
+        elif (self.ever_moved == False and target == (row2,col)):
+            print('INsight clock')
+            if grid[row][col] is not None or grid[row2][col] is not None:
+                raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
+            else:
+                if self.ever_moved == False:
+                    self.ever_moved = True
+                grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
+                grid[self.location[0]][self.location[1]] = None 
+                self.manual_mover(target[0],target[1])
+        elif target == (row,col):
+            print(row,col)
+            print(target)
             if grid[row][col] is not None:
                 raise ValueError(f'Piece {grid[row][col]} is Blocking the Way')
-
-            if (row == 0 and self.player == 'white') or (row == 7 and self.player == 'black'):
-                assert promotion is not None, 'Must pass promotion class'
-                print(promotion(self.player,(row,col)))
-                grid[row][col] = self.promote(promotion,(row,col))
-                # print(grid[row][col])
-                grid[self.location[0]][self.location[1]] = None
             else:
+                if self.ever_moved == False:
+                    self.ever_moved = True
                 grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
-                grid[self.location[0]][self.location[1]] = None
-                self.manual_mover(target[0], target[1])
+                grid[self.location[0]][self.location[1]] = None 
+                self.manual_mover(target[0],target[1])
+        else:
+            raise ValueError('Not Valid Move!')
 
+        print('\nXXXXAFTER MOVEXXXXX\n')
+        print(board)
 
         return True
 
