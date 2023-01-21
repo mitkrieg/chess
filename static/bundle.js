@@ -7030,13 +7030,8 @@ const draggable = new d.Droppable(document.querySelectorAll('.space'), {
     dropzone: '.space'
 });
 
-draggable.on('droppable:dropped', () => console.log('droppable:dropped'))
-// draggable.on('droppable:stop', () => console.log('droppable:returned'))
-// draggable.on('droppable:start', () => console.log('droppable:start'))
+// draggable.on('droppable:dropped', () => console.log('droppable:dropped'))
 
-// draggable.on('drag:start', (evt) => console.log(evt))
-// draggable.on('drag:move', (evt) => console.log(evt))
-// let movedPiece 
 draggable.on('drag:stop', (evt) => {
     console.log('Piece: ',evt.data.source.id);
     console.log('Origin: ', evt.data.sourceContainer.id);
@@ -7059,6 +7054,29 @@ draggable.on('drag:stop', (evt) => {
             console.log(body)
             if (body.success == true) {
                 console.log(body.piece + ' moved from '+ body.movement.origin + ' to ' + body.movement.destination)
+                if (body.castle == true) {
+                    console.log('castle process');
+                    let rook;
+                    let rook_dest;
+                    if (body.movement.destination == '7-6') {
+                        rook = document.getElementById('white-rook-k');
+                        console.log(rook);
+                        rook_dest = '7-5';
+                    } else if (body.movement.destination == '7-2') {
+                        rook = document.getElementById('white-rook-q')
+                        rook_dest = '7-3';
+                    } else if (body.movement.destination == '0-6') {
+                        rook = document.getElementById('black-rook-k')
+                        rook_dest = '0-5';
+                    } else if (body.movement.destination == '0-2') {
+                        rook = document.getElementById('black-rook-q')
+                        rook_dest = '0-3';
+                    } 
+
+                    document.getElementById(rook_dest).appendChild(rook)
+
+                    console.log(rook + ' moved to ' + rook_dest)
+                }
                 if (body.capture == true) {
                     document.getElementById(body.captured_slug).remove();
                     console.log(body.captured_slug + ' was captured')
@@ -7072,6 +7090,8 @@ draggable.on('drag:stop', (evt) => {
                 )
             }
         }
+    ).catch(
+        (e) => {console.log(e)}
     )
 });
 // draggable.on('droppable:dropped', (evt) => console.log(evt))

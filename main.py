@@ -33,6 +33,7 @@ def make_move():
             return jsonify({
                 "success":True, 
                 'capture':True,
+                'castle':False,
                 'piece':piece,
                 'captured_slug':capture.slug,
                 'movement':{
@@ -40,10 +41,22 @@ def make_move():
                     'destination':dest
                 }
             })
+        elif capture == 'castle':
+            return jsonify({
+                "success":True, 
+                'capture':False,
+                'castle':True,
+                'piece':piece,
+                'movement':{
+                    'origin':origin,
+                    'destination':dest,
+                }
+            })
         else:
             return jsonify({
                 "success":True, 
                 'capture':False,
+                'castle':False,
                 'piece':piece,
                 'movement':{
                     'origin':origin,

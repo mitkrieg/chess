@@ -52,7 +52,54 @@ class Piece:
         print(f'{self.name} from {prev_loc} to {curr_loc}')
 
     def move(self, target, board):
-        if self.movement(target):
+        in_movement =  self.movement(target)
+        
+        if in_movement == 'castle':
+            
+            match target :
+                case (7,2):
+                    spaces_to_check = [(7,i) for i in range(1,4)]
+                    rook = board.grid[7][0]
+                    king = board.grid[7][4]
+                    rook_target = (7,3)
+                case (7,6):
+                    spaces_to_check = [(7,i) for i in range(5,7)]
+                    rook = board.grid[7][7]
+                    king = board.grid[7][4]
+                    rook_target = (7,5)
+                case (0,2):
+                    spaces_to_check = [(0,i) for i in range(1,4)]
+                    rook = board.grid[0][0]
+                    king = board.grid[0][4]
+                    rook_target = (0,3)
+                case (0,6):
+                    spaces_to_check = [(0,i) for i in range(5,7)]
+                    rook = board.grid[0][7]
+                    king = board.grid[0][4]
+                    rook_target = (0,5)
+
+            if rook.ever_moved or rook.name != 'rook' or king.ever_moved or king.name != 'king':
+                raise ValueError('Not Valid Move!')
+
+            for space in spaces_to_check:
+                p =  board.grid[space[0]][space[1]]
+                if p is not None:
+                    raise ValueError(f'Piece {p} is blocking the way')
+
+            rook.manual_mover(rook_target[0],rook_target[1])
+            king.manual_mover(target[0],target[1])
+
+            board.grid[rook.location[0]][rook.location[1]] = rook
+            board.grid[king.location[0]][king.location[1]] = king  
+
+            if self.player == 'white':
+                board.white_king = self
+            else:
+                board.black_king = self
+
+            return in_movement  
+
+        elif in_movement:
             square = self.check_block(target,board)
             if square:
                 print('a returned square')
@@ -61,7 +108,10 @@ class Piece:
                 board.grid[self.location[0]][self.location[1]] = None
                 self.manual_mover(target[0], target[1])
 
-                if self.name == 'King':
+                if self.ever_moved == False:
+                    self.ever_moved = True
+
+                if 'king' in self.name:
                     if self.player == 'white':
                         board.white_king = self
                     else:
@@ -283,11 +333,17 @@ class King(Piece):
 
 
     def movement(self, target):
-        return (
-            (target[0] == self.location[0] and abs(target[1] - self.location[1]) == 1) or 
-            (target[1] == self.location[1] and abs(target[0] - self.location[0]) == 1) or
-            (abs(target[0] - self.location[0]) == 1 and abs(target[1] - self.location[1]) == 1)
-        )
+        if self.ever_moved == False and (
+                (target in [(7,6),(7,2)] and self.player == 'white') or
+                (target in [(0,6),(0,2)] and self.player == 'black')
+            ):
+            return 'castle'
+        else:
+            return (
+                (target[0] == self.location[0] and abs(target[1] - self.location[1]) == 1) or 
+                (target[1] == self.location[1] and abs(target[0] - self.location[0]) == 1) or
+                (abs(target[0] - self.location[0]) == 1 and abs(target[1] - self.location[1]) == 1)
+            )
 
     def check_block(self, target, board, test=False):
         grid = board.grid
