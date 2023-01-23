@@ -107,3 +107,10 @@ h1 {
     text-decoration: none;
     cursor: pointer;
   }
+
+  .promotion {
+    display: inline-block;
+    font-size: 96px;
+    text-align: center;
+    cursor: pointer;
+  }

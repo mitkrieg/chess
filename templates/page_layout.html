@@ -10,13 +10,30 @@
     </head>
     <h1>Chess</h1>
     <!-- The Modal -->
-    <div id="myModal" class="modal">
+    <div id="black-promotion-modal" class="modal">
 
         <!-- Modal content -->
         <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>Promote pawn to:</h3>
-        <h1>&#9820; &#9822; &#9821; &#9819;</h1>
+            <span class="close">&times;</span>
+            <h3>Promote pawn to:</h3>
+            <div class="promotion" id="promotion-rook">&#9820;</div>
+            <div class="promotion" id="promotion-knight"> &#9822;</div>
+            <div class="promotion" id="promotion-bishop"> &#9821;</div>
+            <div class="promotion" id="promotion-queen"> &#9819;</div>
+        </div>
+    
+    </div>
+    <!-- The Modal -->
+    <div id="white-promotion-modal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Promote pawn to:</h3>
+            <div class="promotion" id="promotion-rook">&#9814;</div>
+            <div class="promotion" id="promotion-knight"> &#9816;</div>
+            <div class="promotion" id="promotion-bishop"> &#9815;</div>
+            <div class="promotion" id="promotion-queen"> &#9813;</div>
         </div>
     
     </div>

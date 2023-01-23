@@ -135,7 +135,7 @@ class Pawn(Piece):
         self.promoted = False
         super().__init__('pawn', player, location,nickname)
 
-    def move(self, target, board, test=None,promotion=None):
+    def move(self, target, board, promotion=None):
         print(board)
 
         grid = board.grid
@@ -148,21 +148,29 @@ class Pawn(Piece):
             row = self.location[0] + 1
             row2 = self.location[0] + 2
 
-        # if ((row == 0 and self.player == 'white') or (row == 7 and self.player == 'black')) and target == (row,col):
-        #     assert promotion is not None, 'Must pass promotion class'
-        #     print(promotion(self.player,(row,col)))
-        #     grid[row][col] = self.promote(promotion,(row,col))
-        #     # print(grid[row][col])
-        #     grid[self.location[0]][self.location[1]] = None
+        if ((row == 0 and self.player == 'white') or (row == 7 and self.player == 'black')):
+            assert promotion is not None, 'Must pass promotion class'
+            promoted_piece = promotion(self.player,(row,col))
+            # grid[row][col] = self.promote(promotion,(row,col))
+            # print(grid[row][col])
+            # grid[self.location[0]][self.location[1]] = None
+        else:
+            promoted_piece = None
+
         if target == (row,col+1) or target == (row,col -1):
             if grid[target[0]][target[1]] is not None and grid[target[0]][target[1]].player != self.player:
                 if self.ever_moved == False:
                     self.ever_moved = True
                 captured_piece = grid[target[0]][target[1]]
-                grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
-                grid[self.location[0]][self.location[1]] = None 
-                self.manual_mover(target[0],target[1])
-                return captured_piece.capture()
+                if promoted_piece:
+                    grid[target[0]][target[1]] = promoted_piece
+                    grid[self.location[0]][self.location[1]] = None 
+                else:
+                    grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
+                    grid[self.location[0]][self.location[1]] = None 
+                    self.manual_mover(target[0],target[1])
+                    promoted_piece = None
+                return captured_piece.capture(), promoted_piece
             else:
                 print('huh')
                 raise ValueError('Not Valid Move!')
@@ -176,6 +184,7 @@ class Pawn(Piece):
                 grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
                 grid[self.location[0]][self.location[1]] = None 
                 self.manual_mover(target[0],target[1])
+            return None, None
         elif target == (row,col):
             print(row,col)
             print(target)
@@ -184,9 +193,15 @@ class Pawn(Piece):
             else:
                 if self.ever_moved == False:
                     self.ever_moved = True
-                grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
-                grid[self.location[0]][self.location[1]] = None 
-                self.manual_mover(target[0],target[1])
+                if promoted_piece:
+                    grid[target[0]][target[1]] = promoted_piece
+                    grid[self.location[0]][self.location[1]] = None 
+                else:
+                    grid[target[0]][target[1]] = grid[self.location[0]][self.location[1]]
+                    grid[self.location[0]][self.location[1]] = None 
+                    self.manual_mover(target[0],target[1])
+                    promoted_piece = None
+                return None, promoted_piece
         else:
             raise ValueError('Not Valid Move!')
 
