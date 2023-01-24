@@ -71,9 +71,28 @@ class Board:
         else:
             return False
 
-    def checkmae_king(self,color):
+    def checkmate_king(self,color):
         assert color in ('white','black'), 'Must be white or black'
-        pass
+        
+        if color == 'white':
+            king = self.white_king
+        else:
+            king = self.black_king
+
+        locations_to_check = []
+        for i in (-1,0,1):
+            for j in (-1,0,1):
+                l = (king.location[0] + i, king.location[1] + j) 
+                if l[0] >= 0 and l[0] <= 7 and l[1] >= 0 and l[1] <= 7:
+                    locations_to_check.append(j)
+
+        for location in locations_to_check:
+            for row in self.grid:
+                for piece in row:
+                    if piece is None:
+                        continue
+                    
+
 
 
             

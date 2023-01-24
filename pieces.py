@@ -136,7 +136,7 @@ class Pawn(Piece):
         super().__init__('pawn', player, location,nickname)
 
     def move(self, target, board, promotion=None):
-        print(board)
+        # print(board)
 
         grid = board.grid
             
@@ -150,7 +150,7 @@ class Pawn(Piece):
 
         if ((row == 0 and self.player == 'white') or (row == 7 and self.player == 'black')):
             assert promotion is not None, 'Must pass promotion class'
-            promoted_piece = promotion(self.player,(row,col))
+            promoted_piece = promotion(self.player,(target[0],target[1]))
             # grid[row][col] = self.promote(promotion,(row,col))
             # print(grid[row][col])
             # grid[self.location[0]][self.location[1]] = None

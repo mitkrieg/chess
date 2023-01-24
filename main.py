@@ -16,6 +16,7 @@ def main(name=None):
 @app.route('/move', methods=["POST"])
 def make_move():
     # print('It worked!')
+    print(game)
     body = request.get_json()
     
     try:
@@ -31,8 +32,8 @@ def make_move():
         print('Requested Destination: ',dest)
         if piece.split('-')[1] == 'pawn':
             if promo:
-                print('promo if')
-                match promo.split('-')[1] :
+                print('promo if:',promo)
+                match promo.split('-')[1]:
                     case 'rook':
                         promo_class = Rook
                         if player == 'white':
@@ -62,6 +63,8 @@ def make_move():
             else:
                 promo_class = None
             capture, promotion = game.grid[origin_list[0]][origin_list[1]].move((dest_list[0],dest_list[1]), game, promotion=promo_class)
+            print('NEW PIECE:')
+            print(game.grid[dest_list[0]][dest_list[1]])
         else:
             print('other if')
             capture = game.grid[origin_list[0]][origin_list[1]].move((dest_list[0],dest_list[1]),game)
@@ -72,6 +75,8 @@ def make_move():
             check = game.check_king('black')
         else:
             check = game.check_king('white')
+
+        print(game)
         
         if issubclass(type(capture),Piece):
             if promotion is None:
