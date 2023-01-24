@@ -229,7 +229,7 @@ class Queen(Piece):
         super().__init__('queen',player,location,nickname)
 
     def movement(self, target):
-        print('test for valid movemnet')
+        # print('test for valid movemnet')
         return (
             target[0] == self.location[0] or 
             target[1] == self.location[1] or
@@ -237,7 +237,7 @@ class Queen(Piece):
         )
 
     def check_block(self, target, board, test=False):
-        print('test for pieces in the way or captured')
+        # print('test for pieces in the way or captured')
         dist_x =  target[0] - self.location[0]
         dist_y =  target[1] - self.location[1]
         grid = board.grid

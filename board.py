@@ -43,16 +43,16 @@ class Board:
             for col in row:
                 try:
                     if not isinstance(col, Pawn) and issubclass(type(col),Piece) and col.player != king.player:
-                        print('test',col)
+                        # print('test',col)
                         if col.movement(king.location):
-                            print('in movement')
+                            # print('in movement')
                             if col.check_block(king.location,self,test=True):
                                 print(f'CHECK on {king} from {col}')
                                 checks += 1
                     elif isinstance(col, Pawn) and col.player != king.player:
-                        print('test',col)
+                        # print('test',col)
                         if (col.location[1] == king.location[1]-1 or col.location[1] == king.location[1]+1):
-                            print('in column attack range')
+                            # print('in column attack range')
                             if color == 'white' and col.location[0]+1 == king.location[0]:
                                 print(f'CHECK on {king} from {col}')
                                 checks += 1

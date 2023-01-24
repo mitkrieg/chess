@@ -67,12 +67,19 @@ def make_move():
             capture = game.grid[origin_list[0]][origin_list[1]].move((dest_list[0],dest_list[1]),game)
             promotion = None
         print('Captured: ', capture)
+
+        if player == 'white':
+            check = game.check_king('black')
+        else:
+            check = game.check_king('white')
+        
         if issubclass(type(capture),Piece):
             if promotion is None:
                 return jsonify({
                     "success":True, 
                     'capture':True,
                     'castle':False,
+                    'check':check,
                     'promoted':False,
                     'piece':piece,
                     'captured_slug':capture.slug,
@@ -86,6 +93,7 @@ def make_move():
                     "success":True, 
                     'capture':True,
                     'castle':False,
+                    'check':check,
                     'promoted':True,
                     'promotion':{
                         'piece':promo,
@@ -104,6 +112,7 @@ def make_move():
                 "success":True, 
                 'capture':False,
                 'castle':True,
+                'check':check,
                 'piece':piece,
                 'promoted':False,
                 'movement':{
@@ -117,6 +126,7 @@ def make_move():
                     "success":True, 
                     'capture':False,
                     'castle':False,
+                    'check':check,
                     'piece':piece,
                     'promoted':False,
                     'movement':{
@@ -129,6 +139,7 @@ def make_move():
                     "success":True, 
                     'capture':False,
                     'castle':False,
+                    'check':check,
                     'piece':piece,
                     'movement':{
                         'origin':origin,
